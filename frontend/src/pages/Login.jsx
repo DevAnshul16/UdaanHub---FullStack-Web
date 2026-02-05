@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { getErrorMessage } from "../utils/errorHandler";
 
 const Login = () => {
     const navigate = useNavigate();
@@ -25,7 +26,7 @@ const Login = () => {
             await login(formData);
             navigate("/dashboard");
         } catch (err) {
-            setError(err.response?.data?.message || "Login failed");
+            setError(getErrorMessage(err));
         } finally {
             setLoading(false);
         }

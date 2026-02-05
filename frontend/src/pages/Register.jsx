@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { getErrorMessage } from "../utils/errorHandler";
 
 const Register = () => {
     const navigate = useNavigate();
@@ -27,7 +28,7 @@ const Register = () => {
             await register(formData);
             navigate("/dashboard");
         } catch (err) {
-            setError(err.response?.data?.message || "Registration failed");
+            setError(getErrorMessage(err));
         } finally {
             setLoading(false);
         }

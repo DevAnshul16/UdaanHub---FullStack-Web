@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { artisanAPI } from "../services/api";
+import { getErrorMessage } from "../utils/errorHandler";
 
 const ArtisanProfile = () => {
     const { id } = useParams();
@@ -17,7 +18,7 @@ const ArtisanProfile = () => {
                 setProfile(response.data.profile);
             } catch (err) {
                 console.error("Error fetching profile:", err);
-                setError(err.response?.data?.message || "Failed to load profile");
+                setError(getErrorMessage(err));
             } finally {
                 setLoading(false);
             }

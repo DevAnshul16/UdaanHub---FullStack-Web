@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { artisanAPI } from "../services/api";
+import { getErrorMessage } from "../utils/errorHandler";
 
 // Predefined skills list
 const AVAILABLE_SKILLS = [
@@ -62,8 +63,10 @@ const CreateProfile = () => {
     useEffect(() => {
         const loadProfile = async () => {
             try {
+                console.log("🔍 Attempting to load profile...");
                 const response = await artisanAPI.getMyProfile();
                 const profile = response.data.profile;
+                console.log("✅ Profile loaded successfully:", profile);
                 setFormData({
                     profilePhoto: profile.profilePhoto || "",
                     skills: profile.skills || [],
@@ -77,9 +80,12 @@ const CreateProfile = () => {
                     setPhotoPreview(profile.profilePhoto);
                 }
                 setIsEdit(true);
+                console.log("✅ isEdit set to true - Delete button should appear");
             } catch (err) {
                 if (err.response?.status !== 404) {
-                    console.error("Error loading profile:", err);
+                    console.error("❌ Error loading profile:", err);
+                } else {
+                    console.log("ℹ️ No existing profile found (404) - Creating new profile");
                 }
             }
         };
@@ -125,8 +131,23 @@ const CreateProfile = () => {
         setLoading(true);
 
         try {
+            // Validate required fields
             if (formData.skills.length === 0) {
                 setError("Please select at least one skill");
+                setLoading(false);
+                return;
+            }
+
+            // Validate phone number if provided
+            if (formData.phone && !/^\d{10}$/.test(formData.phone)) {
+                setError("Please enter a valid 10-digit phone number");
+                setLoading(false);
+                return;
+            }
+
+            // Validate Aadhaar if provided
+            if (formData.aadhaar && !/^\d{12}$/.test(formData.aadhaar)) {
+                setError("Please enter a valid 12-digit Aadhaar number");
                 setLoading(false);
                 return;
             }
@@ -157,7 +178,7 @@ const CreateProfile = () => {
             navigate("/dashboard");
         } catch (err) {
             console.error("Profile save error:", err);
-            setError(err.response?.data?.message || "Failed to save profile");
+            setError(getErrorMessage(err));
         } finally {
             setLoading(false);
         }
@@ -173,7 +194,7 @@ const CreateProfile = () => {
             navigate("/dashboard");
         } catch (err) {
             console.error("Delete profile error:", err);
-            setError(err.response?.data?.message || "Failed to delete profile");
+            setError(getErrorMessage(err));
             setShowDeleteModal(false);
         } finally {
             setDeleting(false);
@@ -495,6 +516,7 @@ const CreateProfile = () => {
                             >
                                 Cancel
                             </button>
+                            {console.log("🔍 isEdit value:", isEdit, "- Delete button should", isEdit ? "SHOW" : "HIDE")}
                             {isEdit && (
                                 <button
                                     type="button"
